@@ -33,3 +33,7 @@ class SignupAPIView(APIView):
                 {"password_mismatch": "Password fields didn not match."}
             )
         return Response(data, status=response)
+
+
+
+

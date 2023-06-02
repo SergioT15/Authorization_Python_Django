@@ -1,9 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-# from django.contrib.auth.validators import UnicodeUsernameValidator
-# from django.db.models.deletion import CASCADE
-# from django.utils.translation import ugettext_lazy as _
+# import datetime
 
 # Create your models here.
 
@@ -13,27 +11,57 @@ class UserProfileManager(BaseUserManager):
     Defines user creation fields and manages to save user
     """
 
-    def create_user(self, email, username, password=None):
+    def create_user(
+        self,
+        email,
+        full_name,
+        password=None
+        # , birthday=datetime.date(2002, 3, 11)
+    ):
         if not email:
             raise ValueError("Users must have an email address")
+
         user = self.model(
             email=self.normalize_email(email),
-            username=username,
+            full_name=full_name
+            # , birthday=birthday
         )
         user.set_password(password)
         user.save(using=self._db)
 
         return user
 
-    def create_staffuser(self, email, username, password=None):
-        user = self.create_user(email, password=password, username=username)
+    def create_staffuser(
+        self,
+        email,
+        full_name,
+        password=None
+        # birthday=datetime.date(2002, 3, 11)
+    ):
+        user = self.create_user(
+            email=email,
+            password=password,
+            full_name=full_name
+            # , birthday=birthday
+        )
         user.is_staff = True
         user.save(using=self._db)
 
         return user
 
-    def create_superuser(self, email, username, password=None):
-        user = self.create_user(email, password=password, username=username)
+    def create_superuser(
+        self,
+        email,
+        full_name,
+        password=None
+        # , birthday=datetime.date(2002, 3, 11)
+    ):
+        user = self.create_user(
+            email=email,
+            password=password,
+            full_name=full_name,
+            # , birthday=birthday
+        )
         user.is_staff = True
         user.is_admin = True
         user.save(using=self._db)
@@ -51,22 +79,21 @@ class UserProfile(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
-    username = models.CharField(
-        ("username"),
+    full_name = models.CharField(
+        ("full_name"),
         max_length=150,
-        unique=True,
-        error_messages={
-            "unique": ("A user with that username already      exists."),
-        },
+        null=True,
+        blank=True,
     )
+    # birthday = (models.DateField(default=datetime.date(2002, 3, 11)),)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
 
-    USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = [
-        "email",
-    ]
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+    
     objects = UserProfileManager()
 
     def get_full_name(self):
@@ -83,3 +110,6 @@ class UserProfile(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+
+
+# source venv/bin/activate
